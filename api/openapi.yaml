@@ -1,0 +1,3077 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: support@rankvectors.com
+    name: RankVectors Support
+    url: https://docs.rankvectors.com
+  description: "Intelligent internal linking optimization API using AI. \n\nRankVectors\
+    \ helps you automatically discover and implement optimal internal links \nacross\
+    \ your website to improve SEO performance and user experience.\n\n## Key Features\n\
+    - **AI-Powered Analysis**: Uses OpenAI embeddings to find optimal linking opportunities\n\
+    - **Smart Crawling**: Automatically crawls and analyzes your website content\n\
+    - **Automated Implementation**: Implement links via webhooks or manual instructions\n\
+    - **Credit-Based System**: Pay-per-use model with transparent pricing\n- **Multi-Platform\
+    \ Support**: Works with any CMS or platform via REST API\n\n## Getting Started\n\
+    1. Create a project with your website URL\n2. Start a crawl to analyze your content\n\
+    3. Generate AI-powered link suggestions\n4. Implement suggestions via API or webhook\n\
+    5. Track performance and manage credits\n\n## Authentication\nAll API endpoints\
+    \ require authentication using your RankVectors API key.\nInclude your API key\
+    \ in the `Authorization` header:\n```\nAuthorization: Bearer YOUR_API_KEY\n```\n\
+    \nGet your API key from your RankVectors dashboard: Settings → API Keys\n"
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://rankvectors.com/terms
+  title: RankVectors API
+  version: 1.2.0
+servers:
+- description: Production server
+  url: https://api.rankvectors.com
+- description: Staging server
+  url: https://staging-api.rankvectors.com
+- description: Development server
+  url: http://localhost:3000
+security:
+- ApiKeyAuth: []
+tags:
+- description: Project management operations
+  name: Projects
+- description: Website crawling operations
+  name: Crawling
+- description: AI-powered link suggestion operations
+  name: Suggestions
+- description: Link implementation operations
+  name: Implementations
+- description: Credit management operations
+  name: Credits
+- description: Content change verification operations
+  name: Content Verification
+- description: Webhook integration operations
+  name: Webhooks
+paths:
+  /api/projects:
+    get:
+      description: Get a list of all projects for the authenticated user
+      operationId: listProjects
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Project"
+                type: array
+          description: List of projects
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: List all projects
+      tags:
+      - Projects
+    post:
+      description: Create a new project for internal linking optimization
+      operationId: createProject
+      requestBody:
+        content:
+          application/json:
+            examples:
+              basic:
+                summary: Basic project creation
+                value:
+                  name: My Website
+                  domain: https://example.com
+              advanced:
+                summary: Advanced project with custom settings
+                value:
+                  name: My Blog
+                  domain: https://blog.example.com
+                  prompt: Only crawl blog posts and documentation
+                  maxPages: 200
+                  includeSubdomains: false
+                  excludePaths:
+                  - /admin
+                  - /private
+                  enableChangeTracking: true
+            schema:
+              $ref: "#/components/schemas/CreateProjectRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+          description: Project created successfully
+        "400":
+          content:
+            application/json:
+              example:
+                error: Invalid parameters
+                details: Name and domain are required
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Bad request - invalid parameters
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Create a new project
+      tags:
+      - Projects
+  /api/projects/{projectId}:
+    delete:
+      description: Delete a project and all associated data
+      operationId: deleteProject
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/deleteProject_200_response"
+          description: Project deleted successfully
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Delete a project
+      tags:
+      - Projects
+    get:
+      description: Get detailed information about a specific project
+      operationId: getProject
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+          description: Project details
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Get project details
+      tags:
+      - Projects
+  /api/projects/{projectId}/crawl:
+    get:
+      description: Get the crawl history for a project
+      operationId: getCrawlHistory
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Crawl"
+                type: array
+          description: Crawl history
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Get crawl history
+      tags:
+      - Crawling
+    post:
+      description: Start crawling a website to analyze content for link opportunities
+      operationId: startCrawl
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/startCrawl_request"
+        required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Crawl"
+          description: Crawl started successfully
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Start website crawl
+      tags:
+      - Crawling
+  /api/projects/{projectId}/suggestions:
+    get:
+      description: Get AI-generated link suggestions for a project
+      operationId: getSuggestions
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      - description: Filter suggestions by status
+        example: pending
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - pending
+          - approved
+          - rejected
+          - implemented
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Suggestion"
+                type: array
+          description: List of link suggestions
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Get link suggestions
+      tags:
+      - Suggestions
+    post:
+      description: Generate new AI-powered link suggestions for a project
+      operationId: generateSuggestions
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/generateSuggestions_request"
+        required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/generateSuggestions_200_response"
+          description: Suggestions generated successfully
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Generate link suggestions
+      tags:
+      - Suggestions
+  /api/projects/{projectId}/suggestions/{suggestionId}:
+    patch:
+      description: Update the status of a link suggestion
+      operationId: updateSuggestion
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      - description: Unique identifier for the suggestion
+        explode: false
+        in: path
+        name: suggestionId
+        required: true
+        schema:
+          example: sugg-123
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateSuggestion_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Suggestion"
+          description: Suggestion updated successfully
+        "400":
+          content:
+            application/json:
+              example:
+                error: Invalid parameters
+                details: Name and domain are required
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Bad request - invalid parameters
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Update suggestion status
+      tags:
+      - Suggestions
+  /api/projects/{projectId}/implementations:
+    get:
+      description: Get implementation history for a project
+      operationId: listImplementations
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      - description: Filter by implementation status
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - pending
+          - in_progress
+          - success
+          - failed
+          - rolled_back
+          type: string
+        style: form
+      - description: Filter by platform
+        explode: true
+        in: query
+        name: platform
+        required: false
+        schema:
+          enum:
+          - custom
+          type: string
+        style: form
+      - description: Results per page
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          type: integer
+        style: form
+      - description: Pagination offset
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listImplementations_200_response"
+          description: Implementation history
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: List implementations
+      tags:
+      - Implementations
+    post:
+      description: Implement one or more link suggestions
+      operationId: implementLinks
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            examples:
+              single:
+                summary: Single link implementation
+                value:
+                  suggestionIds:
+                  - sugg-123
+                  platform: custom
+                  credentials:
+                    webhookUrl: https://yourapi.com/rankvectors-webhook
+                    apiKey: your-webhook-secret-key
+              batch:
+                summary: Batch implementation
+                value:
+                  suggestionIds:
+                  - sugg-1
+                  - sugg-2
+                  - sugg-3
+                  platform: custom
+                  credentials:
+                    webhookUrl: https://yourapi.com/rankvectors-webhook
+                    apiKey: your-webhook-secret-key
+                  skipContentVerification: false
+                  implementationMethod: api
+            schema:
+              $ref: "#/components/schemas/ImplementationRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImplementationResponse"
+          description: Implementation results
+        "400":
+          content:
+            application/json:
+              example:
+                error: Invalid parameters
+                details: Name and domain are required
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Bad request - invalid parameters
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "402":
+          content:
+            application/json:
+              example:
+                error: Insufficient credits
+                details: You need at least 1 credit to implement links
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Payment required - insufficient credits
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Implement link suggestions
+      tags:
+      - Implementations
+  /api/projects/{projectId}/implementations/{implementationId}:
+    get:
+      description: Get detailed information about a specific implementation
+      operationId: getImplementation
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      - description: Unique identifier for the implementation
+        explode: false
+        in: path
+        name: implementationId
+        required: true
+        schema:
+          example: impl-123
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getImplementation_200_response"
+          description: Implementation details
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Get implementation details
+      tags:
+      - Implementations
+  /api/projects/{projectId}/implementations/{implementationId}/rollback:
+    post:
+      description: Undo a link implementation and restore original content
+      operationId: rollbackImplementation
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      - description: Unique identifier for the implementation
+        explode: false
+        in: path
+        name: implementationId
+        required: true
+        schema:
+          example: impl-123
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/rollbackImplementation_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/rollbackImplementation_200_response"
+          description: Rollback successful
+        "400":
+          content:
+            application/json:
+              example:
+                error: Invalid parameters
+                details: Name and domain are required
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Bad request - invalid parameters
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Rollback implementation
+      tags:
+      - Implementations
+  /api/projects/{projectId}/credits:
+    get:
+      description: Get credit balance and usage history for a project
+      operationId: getCredits
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      - description: Include usage history
+        explode: true
+        in: query
+        name: includeHistory
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - description: History start date (ISO 8601)
+        explode: true
+        in: query
+        name: startDate
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: History end date (ISO 8601)
+        explode: true
+        in: query
+        name: endDate
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditBalance"
+          description: Credit balance and usage information
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Get credit balance
+      tags:
+      - Credits
+    post:
+      description: Add credits to a project (admin or payment webhook use)
+      operationId: addCredits
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/addCredits_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/addCredits_200_response"
+          description: Credits added successfully
+        "400":
+          content:
+            application/json:
+              example:
+                error: Invalid parameters
+                details: Name and domain are required
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Bad request - invalid parameters
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Add credits
+      tags:
+      - Credits
+  /api/projects/{projectId}/verify-content:
+    post:
+      description: Check if page content has changed since last crawl
+      operationId: verifyContent
+      parameters:
+      - description: Unique identifier for the project
+        explode: false
+        in: path
+        name: projectId
+        required: true
+        schema:
+          example: proj-123
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/verifyContent_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/verifyContent_200_response"
+          description: Content verification result
+        "400":
+          content:
+            application/json:
+              example:
+                error: Invalid parameters
+                details: Name and domain are required
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Bad request - invalid parameters
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "403":
+          content:
+            application/json:
+              example:
+                error: Access denied
+                details: You don't have permission to access this project
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Forbidden - access denied to resource
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Verify page content
+      tags:
+      - Content Verification
+  /api/webhook/implement-link:
+    get:
+      description: Get step-by-step instructions for implementing a link
+      operationId: getImplementationInstructions
+      parameters:
+      - description: ID of the suggestion to implement
+        example: sugg-123
+        explode: true
+        in: query
+        name: suggestionId
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImplementationInstructions"
+          description: Implementation instructions
+        "400":
+          content:
+            application/json:
+              example:
+                error: Invalid parameters
+                details: Name and domain are required
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Bad request - invalid parameters
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Get implementation instructions
+      tags:
+      - Webhooks
+    post:
+      description: Report the status of a link implementation
+      operationId: reportImplementationStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/reportImplementationStatus_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/reportImplementationStatus_200_response"
+          description: Status reported successfully
+        "400":
+          content:
+            application/json:
+              example:
+                error: Invalid parameters
+                details: Name and domain are required
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Bad request - invalid parameters
+        "401":
+          content:
+            application/json:
+              example:
+                error: Unauthorized
+                details: Please sign in
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unauthorized - missing or invalid API key
+        "404":
+          content:
+            application/json:
+              example:
+                error: Not found
+                details: Project not found
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Not found - resource doesn't exist
+        "500":
+          content:
+            application/json:
+              example:
+                error: Internal server error
+                details: An unexpected error occurred
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Internal server error
+      summary: Report implementation status
+      tags:
+      - Webhooks
+components:
+  parameters:
+    ProjectId:
+      description: Unique identifier for the project
+      explode: false
+      in: path
+      name: projectId
+      required: true
+      schema:
+        example: proj-123
+        type: string
+      style: simple
+    SuggestionId:
+      description: Unique identifier for the suggestion
+      explode: false
+      in: path
+      name: suggestionId
+      required: true
+      schema:
+        example: sugg-123
+        type: string
+      style: simple
+    ImplementationId:
+      description: Unique identifier for the implementation
+      explode: false
+      in: path
+      name: implementationId
+      required: true
+      schema:
+        example: impl-123
+        type: string
+      style: simple
+  responses:
+    BadRequest:
+      content:
+        application/json:
+          example:
+            error: Invalid parameters
+            details: Name and domain are required
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Bad request - invalid parameters
+    Unauthorized:
+      content:
+        application/json:
+          example:
+            error: Unauthorized
+            details: Please sign in
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Unauthorized - missing or invalid API key
+    PaymentRequired:
+      content:
+        application/json:
+          example:
+            error: Insufficient credits
+            details: You need at least 1 credit to implement links
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Payment required - insufficient credits
+    Forbidden:
+      content:
+        application/json:
+          example:
+            error: Access denied
+            details: You don't have permission to access this project
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Forbidden - access denied to resource
+    NotFound:
+      content:
+        application/json:
+          example:
+            error: Not found
+            details: Project not found
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Not found - resource doesn't exist
+    TooManyRequests:
+      content:
+        application/json:
+          example:
+            error: Rate limit exceeded
+            details: Too many requests. Please try again later.
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Too many requests - rate limit exceeded
+    InternalServerError:
+      content:
+        application/json:
+          example:
+            error: Internal server error
+            details: An unexpected error occurred
+          schema:
+            $ref: "#/components/schemas/Error"
+      description: Internal server error
+  schemas:
+    Project:
+      example:
+        blockAds: true
+        includePaths:
+        - /blog
+        - /docs
+        crawlMaxConcurrency: 5
+        createdAt: 2025-01-15T10:00:00Z
+        _count:
+          pages: 150
+          suggestions: 25
+        searchQuery: SEO optimization
+        enableChangeTracking: false
+        id: proj-123
+        waitFor: 0
+        customHeaders:
+          key: customHeaders
+        updatedAt: 2025-01-15T10:00:00Z
+        includeSubdomains: true
+        excludePaths:
+        - /admin
+        - /private
+        crawlEntireDomain: false
+        sitemapMode: include
+        useReranking: true
+        allowExternalLinks: false
+        crawlDelay: 1000
+        proxyMode: auto
+        userId: user-456
+        ignoreQueryParams: true
+        domain: https://example.com
+        maxDiscoveryDepth: 3
+        maxPages: 100
+        name: My Website
+        onlyMainContent: true
+        prompt: Only crawl blog posts and documentation
+      properties:
+        id:
+          description: Unique project identifier
+          example: proj-123
+          type: string
+        name:
+          description: Project name
+          example: My Website
+          type: string
+        domain:
+          description: Website domain URL
+          example: https://example.com
+          format: uri
+          type: string
+        userId:
+          description: User who owns the project
+          example: user-456
+          type: string
+        prompt:
+          description: Natural language prompt for crawling
+          example: Only crawl blog posts and documentation
+          type: string
+        searchQuery:
+          description: Search query for targeted crawling
+          example: SEO optimization
+          type: string
+        sitemapMode:
+          description: How to handle sitemaps
+          enum:
+          - include
+          - exclude
+          - only
+          example: include
+          type: string
+        includeSubdomains:
+          description: Whether to include subdomains
+          example: true
+          type: boolean
+        ignoreQueryParams:
+          description: Whether to ignore URL query parameters
+          example: true
+          type: boolean
+        maxDiscoveryDepth:
+          description: Maximum crawl depth
+          example: 3
+          type: integer
+        excludePaths:
+          description: Paths to exclude from crawling
+          example:
+          - /admin
+          - /private
+          items:
+            type: string
+          type: array
+        includePaths:
+          description: Specific paths to include
+          example:
+          - /blog
+          - /docs
+          items:
+            type: string
+          type: array
+        crawlEntireDomain:
+          description: Whether to crawl the entire domain
+          example: false
+          type: boolean
+        allowExternalLinks:
+          description: Whether to allow external links
+          example: false
+          type: boolean
+        maxPages:
+          description: Maximum number of pages to crawl
+          example: 100
+          type: integer
+        crawlDelay:
+          description: Delay between crawl requests (ms)
+          example: 1000
+          type: integer
+        crawlMaxConcurrency:
+          description: Maximum concurrent crawl requests
+          example: 5
+          type: integer
+        onlyMainContent:
+          description: Whether to extract only main content
+          example: true
+          type: boolean
+        customHeaders:
+          additionalProperties:
+            type: string
+          description: Custom headers for crawling
+          type: object
+        waitFor:
+          description: Wait time for page load (ms)
+          example: 0
+          type: integer
+        blockAds:
+          description: Whether to block ads
+          example: true
+          type: boolean
+        proxyMode:
+          description: Proxy mode for crawling
+          enum:
+          - auto
+          - residential
+          - datacenter
+          example: auto
+          type: string
+        useReranking:
+          description: Whether to use AI reranking
+          example: true
+          type: boolean
+        enableChangeTracking:
+          description: Whether to enable change tracking
+          example: false
+          type: boolean
+        createdAt:
+          description: Project creation timestamp
+          example: 2025-01-15T10:00:00Z
+          format: date-time
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2025-01-15T10:00:00Z
+          format: date-time
+          type: string
+        _count:
+          $ref: "#/components/schemas/Project__count"
+      required:
+      - createdAt
+      - domain
+      - id
+      - name
+      - updatedAt
+      - userId
+      type: object
+    CreateProjectRequest:
+      example:
+        blockAds: true
+        includeSubdomains: true
+        excludePaths:
+        - /admin
+        - /private
+        crawlEntireDomain: false
+        sitemapMode: include
+        includePaths:
+        - /blog
+        - /docs
+        useReranking: true
+        crawlMaxConcurrency: 5
+        allowExternalLinks: false
+        crawlDelay: 1000
+        proxyMode: auto
+        ignoreQueryParams: true
+        domain: https://example.com
+        searchQuery: SEO optimization
+        maxDiscoveryDepth: 3
+        maxPages: 100
+        name: My Website
+        onlyMainContent: true
+        enableChangeTracking: false
+        prompt: Only crawl blog posts and documentation
+        waitFor: 0
+        customHeaders:
+          key: customHeaders
+      properties:
+        name:
+          description: Project name
+          example: My Website
+          type: string
+        domain:
+          description: Website domain URL
+          example: https://example.com
+          format: uri
+          type: string
+        prompt:
+          description: Natural language prompt for crawling
+          example: Only crawl blog posts and documentation
+          type: string
+        searchQuery:
+          description: Search query for targeted crawling
+          example: SEO optimization
+          type: string
+        sitemapMode:
+          default: include
+          description: How to handle sitemaps
+          enum:
+          - include
+          - exclude
+          - only
+          example: include
+          type: string
+        includeSubdomains:
+          default: true
+          description: Whether to include subdomains
+          example: true
+          type: boolean
+        ignoreQueryParams:
+          default: true
+          description: Whether to ignore URL query parameters
+          example: true
+          type: boolean
+        maxDiscoveryDepth:
+          description: Maximum crawl depth
+          example: 3
+          type: integer
+        excludePaths:
+          description: Paths to exclude from crawling
+          example:
+          - /admin
+          - /private
+          items:
+            type: string
+          type: array
+        includePaths:
+          description: Specific paths to include
+          example:
+          - /blog
+          - /docs
+          items:
+            type: string
+          type: array
+        crawlEntireDomain:
+          default: false
+          description: Whether to crawl the entire domain
+          example: false
+          type: boolean
+        allowExternalLinks:
+          default: false
+          description: Whether to allow external links
+          example: false
+          type: boolean
+        maxPages:
+          default: 100
+          description: Maximum number of pages to crawl
+          example: 100
+          type: integer
+        crawlDelay:
+          description: Delay between crawl requests (ms)
+          example: 1000
+          type: integer
+        crawlMaxConcurrency:
+          description: Maximum concurrent crawl requests
+          example: 5
+          type: integer
+        onlyMainContent:
+          default: true
+          description: Whether to extract only main content
+          example: true
+          type: boolean
+        customHeaders:
+          additionalProperties:
+            type: string
+          description: Custom headers for crawling
+          type: object
+        waitFor:
+          default: 0
+          description: Wait time for page load (ms)
+          example: 0
+          type: integer
+        blockAds:
+          default: true
+          description: Whether to block ads
+          example: true
+          type: boolean
+        proxyMode:
+          default: auto
+          description: Proxy mode for crawling
+          enum:
+          - auto
+          - residential
+          - datacenter
+          example: auto
+          type: string
+        useReranking:
+          default: true
+          description: Whether to use AI reranking
+          example: true
+          type: boolean
+        enableChangeTracking:
+          default: false
+          description: Whether to enable change tracking
+          example: false
+          type: boolean
+      required:
+      - domain
+      - name
+      type: object
+    Crawl:
+      example:
+        completedAt: 2025-01-15T10:05:00Z
+        errorMessage: Connection timeout
+        startedAt: 2025-01-15T10:00:00Z
+        id: crawl-123
+        projectId: proj-123
+        pagesCrawled: 150
+        status: completed
+      properties:
+        id:
+          description: Unique crawl identifier
+          example: crawl-123
+          type: string
+        projectId:
+          description: Project identifier
+          example: proj-123
+          type: string
+        status:
+          description: Crawl status
+          enum:
+          - pending
+          - in_progress
+          - completed
+          - failed
+          example: completed
+          type: string
+        startedAt:
+          description: Crawl start timestamp
+          example: 2025-01-15T10:00:00Z
+          format: date-time
+          type: string
+        completedAt:
+          description: Crawl completion timestamp
+          example: 2025-01-15T10:05:00Z
+          format: date-time
+          type: string
+        pagesCrawled:
+          description: Number of pages crawled
+          example: 150
+          type: integer
+        errorMessage:
+          description: Error message if crawl failed
+          example: Connection timeout
+          type: string
+      required:
+      - id
+      - projectId
+      - startedAt
+      - status
+      type: object
+    Suggestion:
+      example:
+        createdAt: 2025-01-15T10:00:00Z
+        anchorText: internal linking
+        relevanceScore: 0.85
+        sourcePage:
+          wordCount: 500
+          description: Page description
+          title: Page Title
+          url: https://example.com/page
+        reasoning: High semantic similarity between source and target content
+        context: Learn more about internal linking strategies.
+        id: sugg-123
+        projectId: proj-123
+        status: pending
+        targetPage:
+          wordCount: 500
+          description: Page description
+          title: Page Title
+          url: https://example.com/page
+        updatedAt: 2025-01-15T10:00:00Z
+      properties:
+        id:
+          description: Unique suggestion identifier
+          example: sugg-123
+          type: string
+        projectId:
+          description: Project identifier
+          example: proj-123
+          type: string
+        status:
+          description: Suggestion status
+          enum:
+          - pending
+          - approved
+          - rejected
+          - implemented
+          example: pending
+          type: string
+        relevanceScore:
+          description: AI-calculated relevance score (0-1)
+          example: 0.85
+          maximum: 1
+          minimum: 0
+          type: number
+        anchorText:
+          description: Suggested anchor text
+          example: internal linking
+          type: string
+        context:
+          description: Context where the link should be placed
+          example: Learn more about internal linking strategies.
+          type: string
+        sourcePage:
+          $ref: "#/components/schemas/PageInfo"
+        targetPage:
+          $ref: "#/components/schemas/PageInfo"
+        reasoning:
+          description: AI reasoning for the suggestion
+          example: High semantic similarity between source and target content
+          type: string
+        createdAt:
+          description: Suggestion creation timestamp
+          example: 2025-01-15T10:00:00Z
+          format: date-time
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2025-01-15T10:00:00Z
+          format: date-time
+          type: string
+      required:
+      - anchorText
+      - createdAt
+      - id
+      - projectId
+      - relevanceScore
+      - sourcePage
+      - status
+      - targetPage
+      type: object
+    PageInfo:
+      example:
+        wordCount: 500
+        description: Page description
+        title: Page Title
+        url: https://example.com/page
+      properties:
+        url:
+          description: Page URL
+          example: https://example.com/page
+          format: uri
+          type: string
+        title:
+          description: Page title
+          example: Page Title
+          type: string
+        description:
+          description: Page description
+          example: Page description
+          type: string
+        wordCount:
+          description: Page word count
+          example: 500
+          type: integer
+      required:
+      - title
+      - url
+      type: object
+    LinkOpportunity:
+      example:
+        anchorText: internal linking
+        relevanceScore: 0.85
+        sourcePage:
+          wordCount: 500
+          description: Page description
+          title: Page Title
+          url: https://example.com/page
+        reasoning: High semantic similarity between source and target content
+        context: Learn more about internal linking strategies.
+        targetPage:
+          wordCount: 500
+          description: Page description
+          title: Page Title
+          url: https://example.com/page
+      properties:
+        relevanceScore:
+          description: AI-calculated relevance score (0-1)
+          example: 0.85
+          maximum: 1
+          minimum: 0
+          type: number
+        anchorText:
+          description: Suggested anchor text
+          example: internal linking
+          type: string
+        context:
+          description: Context where the link should be placed
+          example: Learn more about internal linking strategies.
+          type: string
+        sourcePage:
+          $ref: "#/components/schemas/PageInfo"
+        targetPage:
+          $ref: "#/components/schemas/PageInfo"
+        reasoning:
+          description: AI reasoning for the suggestion
+          example: High semantic similarity between source and target content
+          type: string
+      required:
+      - anchorText
+      - relevanceScore
+      - sourcePage
+      - targetPage
+      type: object
+    ImplementationRequest:
+      example:
+        credentials:
+          apiKey: your-webhook-secret-key
+          webhookUrl: https://yourapi.com/rankvectors-webhook
+        suggestionIds:
+        - sugg-1
+        - sugg-2
+        skipContentVerification: false
+        implementationMethod: api
+        platform: custom
+      properties:
+        suggestionIds:
+          description: Array of suggestion IDs to implement
+          example:
+          - sugg-1
+          - sugg-2
+          items:
+            type: string
+          minItems: 1
+          type: array
+        platform:
+          description: Platform type
+          enum:
+          - custom
+          example: custom
+          type: string
+        credentials:
+          $ref: "#/components/schemas/CustomCredentials"
+        skipContentVerification:
+          default: false
+          description: Skip content change detection
+          example: false
+          type: boolean
+        implementationMethod:
+          default: api
+          description: Implementation method
+          enum:
+          - api
+          - manual
+          example: api
+          type: string
+      required:
+      - credentials
+      - platform
+      - suggestionIds
+      type: object
+    CustomCredentials:
+      example:
+        apiKey: your-webhook-secret-key
+        webhookUrl: https://yourapi.com/rankvectors-webhook
+      properties:
+        webhookUrl:
+          description: Webhook URL for implementation
+          example: https://yourapi.com/rankvectors-webhook
+          format: uri
+          type: string
+        apiKey:
+          description: Webhook secret key
+          example: your-webhook-secret-key
+          type: string
+      required:
+      - apiKey
+      - webhookUrl
+      type: object
+    ImplementationResponse:
+      example:
+        summary:
+          total: 2
+          failed: 0
+          succeeded: 2
+          creditsUsed: 2
+        success: true
+        results:
+        - implementationId: impl-123
+          success: true
+          error: Insufficient credits
+          creditsUsed: 1
+        - implementationId: impl-123
+          success: true
+          error: Insufficient credits
+          creditsUsed: 1
+      properties:
+        success:
+          description: Whether any implementations succeeded
+          example: true
+          type: boolean
+        results:
+          description: Individual implementation results
+          items:
+            $ref: "#/components/schemas/ImplementationResult"
+          type: array
+        summary:
+          $ref: "#/components/schemas/ImplementationSummary"
+      required:
+      - results
+      - success
+      - summary
+      type: object
+    ImplementationResult:
+      example:
+        implementationId: impl-123
+        success: true
+        error: Insufficient credits
+        creditsUsed: 1
+      properties:
+        success:
+          description: Whether implementation succeeded
+          example: true
+          type: boolean
+        implementationId:
+          description: Implementation identifier
+          example: impl-123
+          type: string
+        creditsUsed:
+          description: Credits consumed
+          example: 1
+          type: number
+        error:
+          description: Error message if failed
+          example: Insufficient credits
+          type: string
+      required:
+      - success
+      type: object
+    ImplementationSummary:
+      example:
+        total: 2
+        failed: 0
+        succeeded: 2
+        creditsUsed: 2
+      properties:
+        total:
+          description: Total number of implementations
+          example: 2
+          type: integer
+        succeeded:
+          description: Number of successful implementations
+          example: 2
+          type: integer
+        failed:
+          description: Number of failed implementations
+          example: 0
+          type: integer
+        creditsUsed:
+          description: Total credits used
+          example: 2
+          type: number
+      required:
+      - creditsUsed
+      - failed
+      - succeeded
+      - total
+      type: object
+    Implementation:
+      example:
+        createdAt: 2025-01-15T10:00:00Z
+        completedAt: 2025-01-15T10:00:05Z
+        metadata:
+          postId: 456
+          postUrl: https://example.com/source
+        rollbacks:
+        - reason: Incorrect link placement
+          createdAt: 2025-01-15T10:00:00Z
+          id: rollback-123
+          creditsRefunded: 0.5
+        - reason: Incorrect link placement
+          createdAt: 2025-01-15T10:00:00Z
+          id: rollback-123
+          creditsRefunded: 0.5
+        suggestion:
+          createdAt: 2025-01-15T10:00:00Z
+          anchorText: internal linking
+          relevanceScore: 0.85
+          sourcePage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+          reasoning: High semantic similarity between source and target content
+          context: Learn more about internal linking strategies.
+          id: sugg-123
+          projectId: proj-123
+          status: pending
+          targetPage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+          updatedAt: 2025-01-15T10:00:00Z
+        implementationMethod: api
+        id: impl-123
+        platform: custom
+        status: success
+        creditsUsed: 1
+      properties:
+        id:
+          description: Unique implementation identifier
+          example: impl-123
+          type: string
+        status:
+          description: Implementation status
+          enum:
+          - pending
+          - in_progress
+          - success
+          - failed
+          - rolled_back
+          example: success
+          type: string
+        platform:
+          description: Platform used
+          enum:
+          - custom
+          example: custom
+          type: string
+        implementationMethod:
+          description: Implementation method
+          enum:
+          - api
+          - manual
+          example: api
+          type: string
+        creditsUsed:
+          description: Credits consumed
+          example: 1
+          type: number
+        createdAt:
+          description: Implementation start timestamp
+          example: 2025-01-15T10:00:00Z
+          format: date-time
+          type: string
+        completedAt:
+          description: Implementation completion timestamp
+          example: 2025-01-15T10:00:05Z
+          format: date-time
+          type: string
+        metadata:
+          additionalProperties: true
+          description: Platform-specific metadata
+          example:
+            postId: 456
+            postUrl: https://example.com/source
+          type: object
+        suggestion:
+          $ref: "#/components/schemas/Suggestion"
+        rollbacks:
+          description: Rollback history
+          items:
+            $ref: "#/components/schemas/Rollback"
+          type: array
+      required:
+      - createdAt
+      - creditsUsed
+      - id
+      - platform
+      - status
+      - suggestion
+      type: object
+    Rollback:
+      example:
+        reason: Incorrect link placement
+        createdAt: 2025-01-15T10:00:00Z
+        id: rollback-123
+        creditsRefunded: 0.5
+      properties:
+        id:
+          description: Unique rollback identifier
+          example: rollback-123
+          type: string
+        reason:
+          description: Reason for rollback
+          example: Incorrect link placement
+          type: string
+        createdAt:
+          description: Rollback timestamp
+          example: 2025-01-15T10:00:00Z
+          format: date-time
+          type: string
+        creditsRefunded:
+          description: Credits refunded
+          example: 0.5
+          type: number
+      required:
+      - createdAt
+      - id
+      - reason
+      type: object
+    CreditBalance:
+      example:
+        pageLimit:
+          limit: 1000
+          used: 150
+          remaining: 850
+        spendingLimit:
+          limit: 100
+          used: 25.5
+          enabled: true
+          remaining: 74.5
+        autoRecharge:
+          amount: 500
+          threshold: 10
+          enabled: false
+        balance:
+          creditsTotal: 100
+          projectId: proj-123
+          lastResetAt: 2025-01-01T00:00:00Z
+          creditsUsed: 25.5
+          creditsRemaining: 74.5
+        success: true
+        usageHistory:
+        - createdAt: 2025-01-15T10:00:00Z
+          metadata:
+            suggestionId: sugg-123
+            implementationId: impl-123
+          action: link_implemented
+          id: usage-1
+          creditsUsed: 1
+        - createdAt: 2025-01-15T10:00:00Z
+          metadata:
+            suggestionId: sugg-123
+            implementationId: impl-123
+          action: link_implemented
+          id: usage-1
+          creditsUsed: 1
+        currentPeriod:
+          endDate: 2025-01-31T23:59:59Z
+          totalCharges: 25.5
+          startDate: 2025-01-01T00:00:00Z
+      properties:
+        success:
+          example: true
+          type: boolean
+        balance:
+          $ref: "#/components/schemas/CreditBalanceInfo"
+        pageLimit:
+          $ref: "#/components/schemas/PageLimitStatus"
+        spendingLimit:
+          $ref: "#/components/schemas/SpendingLimitStatus"
+        autoRecharge:
+          $ref: "#/components/schemas/AutoRechargeSettings"
+        currentPeriod:
+          $ref: "#/components/schemas/PeriodCharges"
+        usageHistory:
+          description: Usage history (if requested)
+          items:
+            $ref: "#/components/schemas/UsageHistoryItem"
+          type: array
+      required:
+      - autoRecharge
+      - balance
+      - currentPeriod
+      - pageLimit
+      - spendingLimit
+      - success
+      type: object
+    CreditBalanceInfo:
+      example:
+        creditsTotal: 100
+        projectId: proj-123
+        lastResetAt: 2025-01-01T00:00:00Z
+        creditsUsed: 25.5
+        creditsRemaining: 74.5
+      properties:
+        projectId:
+          description: Project identifier
+          example: proj-123
+          type: string
+        creditsTotal:
+          description: Total credits purchased
+          example: 100
+          type: number
+        creditsUsed:
+          description: Credits consumed
+          example: 25.5
+          type: number
+        creditsRemaining:
+          description: Credits remaining
+          example: 74.5
+          type: number
+        lastResetAt:
+          description: Last credit reset timestamp
+          example: 2025-01-01T00:00:00Z
+          format: date-time
+          type: string
+      required:
+      - creditsRemaining
+      - creditsTotal
+      - creditsUsed
+      - projectId
+      type: object
+    PageLimitStatus:
+      example:
+        limit: 1000
+        used: 150
+        remaining: 850
+      properties:
+        limit:
+          description: Page limit
+          example: 1000
+          type: integer
+        used:
+          description: Pages used
+          example: 150
+          type: integer
+        remaining:
+          description: Pages remaining
+          example: 850
+          type: integer
+      required:
+      - limit
+      - remaining
+      - used
+      type: object
+    SpendingLimitStatus:
+      example:
+        limit: 100
+        used: 25.5
+        enabled: true
+        remaining: 74.5
+      properties:
+        enabled:
+          description: Whether spending limit is enabled
+          example: true
+          type: boolean
+        limit:
+          description: Spending limit
+          example: 100
+          type: number
+        used:
+          description: Amount used
+          example: 25.5
+          type: number
+        remaining:
+          description: Amount remaining
+          example: 74.5
+          type: number
+      required:
+      - enabled
+      - limit
+      - remaining
+      - used
+      type: object
+    AutoRechargeSettings:
+      example:
+        amount: 500
+        threshold: 10
+        enabled: false
+      properties:
+        enabled:
+          description: Whether auto-recharge is enabled
+          example: false
+          type: boolean
+        threshold:
+          description: Credit threshold for auto-recharge
+          example: 10
+          type: number
+        amount:
+          description: Amount to recharge
+          example: 500
+          type: number
+      required:
+      - amount
+      - enabled
+      - threshold
+      type: object
+    PeriodCharges:
+      example:
+        endDate: 2025-01-31T23:59:59Z
+        totalCharges: 25.5
+        startDate: 2025-01-01T00:00:00Z
+      properties:
+        startDate:
+          description: Period start date
+          example: 2025-01-01T00:00:00Z
+          format: date-time
+          type: string
+        endDate:
+          description: Period end date
+          example: 2025-01-31T23:59:59Z
+          format: date-time
+          type: string
+        totalCharges:
+          description: Total charges for the period
+          example: 25.5
+          type: number
+      required:
+      - endDate
+      - startDate
+      - totalCharges
+      type: object
+    UsageHistoryItem:
+      example:
+        createdAt: 2025-01-15T10:00:00Z
+        metadata:
+          suggestionId: sugg-123
+          implementationId: impl-123
+        action: link_implemented
+        id: usage-1
+        creditsUsed: 1
+      properties:
+        id:
+          description: Usage item identifier
+          example: usage-1
+          type: string
+        action:
+          description: Action performed
+          example: link_implemented
+          type: string
+        creditsUsed:
+          description: Credits used
+          example: 1
+          type: number
+        createdAt:
+          description: Usage timestamp
+          example: 2025-01-15T10:00:00Z
+          format: date-time
+          type: string
+        metadata:
+          additionalProperties: true
+          description: Additional metadata
+          example:
+            suggestionId: sugg-123
+            implementationId: impl-123
+          type: object
+      required:
+      - action
+      - createdAt
+      - creditsUsed
+      - id
+      type: object
+    ContentVerification:
+      example:
+        reason: Page is same
+        changeResult:
+          previousScrapeAt: 2025-01-14T10:00:00Z
+          visibility: visible
+          pageUrl: https://example.com/page
+          changeStatus: same
+        safe: true
+      properties:
+        safe:
+          description: Whether it's safe to implement the link
+          example: true
+          type: boolean
+        reason:
+          description: Reason for the verification result
+          example: Page is same
+          type: string
+        changeResult:
+          $ref: "#/components/schemas/ChangeResult"
+      required:
+      - reason
+      - safe
+      type: object
+    ChangeResult:
+      example:
+        previousScrapeAt: 2025-01-14T10:00:00Z
+        visibility: visible
+        pageUrl: https://example.com/page
+        changeStatus: same
+      properties:
+        pageUrl:
+          description: URL of the page
+          example: https://example.com/page
+          format: uri
+          type: string
+        changeStatus:
+          description: Change status
+          enum:
+          - same
+          - changed
+          - not_found
+          example: same
+          type: string
+        visibility:
+          description: Page visibility
+          enum:
+          - visible
+          - hidden
+          - error
+          example: visible
+          type: string
+        previousScrapeAt:
+          description: Previous scrape timestamp
+          example: 2025-01-14T10:00:00Z
+          format: date-time
+          type: string
+      required:
+      - changeStatus
+      - pageUrl
+      - visibility
+      type: object
+    ImplementationInstructions:
+      example:
+        instructions:
+          htmlExample: <a href="https://example.com/target">internal linking</a>
+          steps:
+          - "Navigate to the page: https://example.com/page"
+          - "Locate the text: 'Learn more about internal linking strategies.'"
+          - Replace 'internal linking' with a link to https://example.com/target
+        anchorText: internal linking
+        suggestionId: sugg-123
+        context: Learn more about internal linking strategies.
+        pageUrl: https://example.com/page
+        targetUrl: https://example.com/target
+      properties:
+        suggestionId:
+          description: Suggestion identifier
+          example: sugg-123
+          type: string
+        pageUrl:
+          description: URL of the page to modify
+          example: https://example.com/page
+          format: uri
+          type: string
+        anchorText:
+          description: Text to turn into a link
+          example: internal linking
+          type: string
+        targetUrl:
+          description: URL to link to
+          example: https://example.com/target
+          format: uri
+          type: string
+        context:
+          description: Context where the link should be placed
+          example: Learn more about internal linking strategies.
+          type: string
+        instructions:
+          $ref: "#/components/schemas/StepByStepInstructions"
+      required:
+      - anchorText
+      - context
+      - instructions
+      - pageUrl
+      - suggestionId
+      - targetUrl
+      type: object
+    StepByStepInstructions:
+      example:
+        htmlExample: <a href="https://example.com/target">internal linking</a>
+        steps:
+        - "Navigate to the page: https://example.com/page"
+        - "Locate the text: 'Learn more about internal linking strategies.'"
+        - Replace 'internal linking' with a link to https://example.com/target
+      properties:
+        steps:
+          description: Step-by-step instructions
+          example:
+          - "Navigate to the page: https://example.com/page"
+          - "Locate the text: 'Learn more about internal linking strategies.'"
+          - Replace 'internal linking' with a link to https://example.com/target
+          items:
+            type: string
+          type: array
+        htmlExample:
+          description: HTML example of the implementation
+          example: <a href="https://example.com/target">internal linking</a>
+          type: string
+      required:
+      - htmlExample
+      - steps
+      type: object
+    Error:
+      example:
+        code: VALIDATION_ERROR
+        name: ValidationError
+        details: Name and domain are required
+        error: Invalid parameters
+      properties:
+        error:
+          description: Error message
+          example: Invalid parameters
+          type: string
+        details:
+          description: Additional error details
+          example: Name and domain are required
+          type: string
+        code:
+          description: Error code
+          example: VALIDATION_ERROR
+          type: string
+        name:
+          description: Error name
+          example: ValidationError
+          type: string
+      required:
+      - error
+      type: object
+    deleteProject_200_response:
+      example:
+        success: true
+        message: Project deleted successfully
+      properties:
+        success:
+          example: true
+          type: boolean
+        message:
+          example: Project deleted successfully
+          type: string
+      type: object
+    startCrawl_request:
+      properties:
+        limit:
+          description: Maximum number of pages to crawl
+          example: 100
+          maximum: 1000
+          minimum: 1
+          type: integer
+      type: object
+    generateSuggestions_request:
+      properties:
+        minRelevanceScore:
+          description: Minimum relevance score for suggestions
+          example: 0.7
+          maximum: 1
+          minimum: 0
+          type: number
+      type: object
+    generateSuggestions_200_response:
+      example:
+        success: true
+        count: 15
+        opportunities:
+        - anchorText: internal linking
+          relevanceScore: 0.85
+          sourcePage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+          reasoning: High semantic similarity between source and target content
+          context: Learn more about internal linking strategies.
+          targetPage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+        - anchorText: internal linking
+          relevanceScore: 0.85
+          sourcePage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+          reasoning: High semantic similarity between source and target content
+          context: Learn more about internal linking strategies.
+          targetPage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+        - anchorText: internal linking
+          relevanceScore: 0.85
+          sourcePage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+          reasoning: High semantic similarity between source and target content
+          context: Learn more about internal linking strategies.
+          targetPage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+        - anchorText: internal linking
+          relevanceScore: 0.85
+          sourcePage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+          reasoning: High semantic similarity between source and target content
+          context: Learn more about internal linking strategies.
+          targetPage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+        - anchorText: internal linking
+          relevanceScore: 0.85
+          sourcePage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+          reasoning: High semantic similarity between source and target content
+          context: Learn more about internal linking strategies.
+          targetPage:
+            wordCount: 500
+            description: Page description
+            title: Page Title
+            url: https://example.com/page
+      properties:
+        success:
+          example: true
+          type: boolean
+        count:
+          description: Number of suggestions generated
+          example: 15
+          type: integer
+        opportunities:
+          description: Top 10 opportunities preview
+          items:
+            $ref: "#/components/schemas/LinkOpportunity"
+          maxItems: 10
+          type: array
+      type: object
+    updateSuggestion_request:
+      properties:
+        status:
+          description: New status for the suggestion
+          enum:
+          - approved
+          - rejected
+          example: approved
+          type: string
+      required:
+      - status
+      type: object
+    listImplementations_200_response:
+      example:
+        success: true
+        count: 25
+        filters: "{}"
+        implementations:
+        - createdAt: 2025-01-15T10:00:00Z
+          completedAt: 2025-01-15T10:00:05Z
+          metadata:
+            postId: 456
+            postUrl: https://example.com/source
+          rollbacks:
+          - reason: Incorrect link placement
+            createdAt: 2025-01-15T10:00:00Z
+            id: rollback-123
+            creditsRefunded: 0.5
+          - reason: Incorrect link placement
+            createdAt: 2025-01-15T10:00:00Z
+            id: rollback-123
+            creditsRefunded: 0.5
+          suggestion:
+            createdAt: 2025-01-15T10:00:00Z
+            anchorText: internal linking
+            relevanceScore: 0.85
+            sourcePage:
+              wordCount: 500
+              description: Page description
+              title: Page Title
+              url: https://example.com/page
+            reasoning: High semantic similarity between source and target content
+            context: Learn more about internal linking strategies.
+            id: sugg-123
+            projectId: proj-123
+            status: pending
+            targetPage:
+              wordCount: 500
+              description: Page description
+              title: Page Title
+              url: https://example.com/page
+            updatedAt: 2025-01-15T10:00:00Z
+          implementationMethod: api
+          id: impl-123
+          platform: custom
+          status: success
+          creditsUsed: 1
+        - createdAt: 2025-01-15T10:00:00Z
+          completedAt: 2025-01-15T10:00:05Z
+          metadata:
+            postId: 456
+            postUrl: https://example.com/source
+          rollbacks:
+          - reason: Incorrect link placement
+            createdAt: 2025-01-15T10:00:00Z
+            id: rollback-123
+            creditsRefunded: 0.5
+          - reason: Incorrect link placement
+            createdAt: 2025-01-15T10:00:00Z
+            id: rollback-123
+            creditsRefunded: 0.5
+          suggestion:
+            createdAt: 2025-01-15T10:00:00Z
+            anchorText: internal linking
+            relevanceScore: 0.85
+            sourcePage:
+              wordCount: 500
+              description: Page description
+              title: Page Title
+              url: https://example.com/page
+            reasoning: High semantic similarity between source and target content
+            context: Learn more about internal linking strategies.
+            id: sugg-123
+            projectId: proj-123
+            status: pending
+            targetPage:
+              wordCount: 500
+              description: Page description
+              title: Page Title
+              url: https://example.com/page
+            updatedAt: 2025-01-15T10:00:00Z
+          implementationMethod: api
+          id: impl-123
+          platform: custom
+          status: success
+          creditsUsed: 1
+      properties:
+        success:
+          example: true
+          type: boolean
+        implementations:
+          items:
+            $ref: "#/components/schemas/Implementation"
+          type: array
+        count:
+          description: Number of implementations returned
+          example: 25
+          type: integer
+        filters:
+          description: Applied filters
+          type: object
+      type: object
+    getImplementation_200_response:
+      example:
+        success: true
+        implementation:
+          createdAt: 2025-01-15T10:00:00Z
+          completedAt: 2025-01-15T10:00:05Z
+          metadata:
+            postId: 456
+            postUrl: https://example.com/source
+          rollbacks:
+          - reason: Incorrect link placement
+            createdAt: 2025-01-15T10:00:00Z
+            id: rollback-123
+            creditsRefunded: 0.5
+          - reason: Incorrect link placement
+            createdAt: 2025-01-15T10:00:00Z
+            id: rollback-123
+            creditsRefunded: 0.5
+          suggestion:
+            createdAt: 2025-01-15T10:00:00Z
+            anchorText: internal linking
+            relevanceScore: 0.85
+            sourcePage:
+              wordCount: 500
+              description: Page description
+              title: Page Title
+              url: https://example.com/page
+            reasoning: High semantic similarity between source and target content
+            context: Learn more about internal linking strategies.
+            id: sugg-123
+            projectId: proj-123
+            status: pending
+            targetPage:
+              wordCount: 500
+              description: Page description
+              title: Page Title
+              url: https://example.com/page
+            updatedAt: 2025-01-15T10:00:00Z
+          implementationMethod: api
+          id: impl-123
+          platform: custom
+          status: success
+          creditsUsed: 1
+      properties:
+        success:
+          example: true
+          type: boolean
+        implementation:
+          $ref: "#/components/schemas/Implementation"
+      type: object
+    rollbackImplementation_request:
+      properties:
+        reason:
+          description: Reason for rollback
+          example: Incorrect link placement
+          type: string
+        credentials:
+          $ref: "#/components/schemas/CustomCredentials"
+      required:
+      - reason
+      type: object
+    rollbackImplementation_200_response:
+      example:
+        success: true
+        message: Successfully rolled back implementation. 0.5 credits refunded.
+        creditsRefunded: 0.5
+      properties:
+        success:
+          example: true
+          type: boolean
+        creditsRefunded:
+          description: Credits refunded (50% of implementation cost)
+          example: 0.5
+          type: number
+        message:
+          example: Successfully rolled back implementation. 0.5 credits refunded.
+          type: string
+      type: object
+    addCredits_request:
+      properties:
+        amount:
+          description: Number of credits to add
+          example: 100
+          minimum: 1
+          type: number
+        source:
+          default: manual_addition
+          description: Source of credits
+          example: purchase
+          type: string
+      required:
+      - amount
+      type: object
+    addCredits_200_response:
+      example:
+        balance:
+          creditsTotal: 100
+          projectId: proj-123
+          lastResetAt: 2025-01-01T00:00:00Z
+          creditsUsed: 25.5
+          creditsRemaining: 74.5
+        success: true
+        message: Successfully added 100 credits
+      properties:
+        success:
+          example: true
+          type: boolean
+        balance:
+          $ref: "#/components/schemas/CreditBalanceInfo"
+        message:
+          example: Successfully added 100 credits
+          type: string
+      type: object
+    verifyContent_request:
+      properties:
+        pageUrl:
+          description: URL of the page to verify
+          example: https://example.com/page
+          format: uri
+          type: string
+        suggestionId:
+          description: ID of the suggestion to verify
+          example: sugg-123
+          type: string
+      required:
+      - pageUrl
+      - suggestionId
+      type: object
+    verifyContent_200_response:
+      example:
+        success: true
+        verification:
+          reason: Page is same
+          changeResult:
+            previousScrapeAt: 2025-01-14T10:00:00Z
+            visibility: visible
+            pageUrl: https://example.com/page
+            changeStatus: same
+          safe: true
+      properties:
+        success:
+          example: true
+          type: boolean
+        verification:
+          $ref: "#/components/schemas/ContentVerification"
+      type: object
+    reportImplementationStatus_request:
+      properties:
+        suggestionId:
+          description: ID of the suggestion
+          example: sugg-123
+          type: string
+        apiKey:
+          description: Your RankVectors API key
+          example: rv_1234567890abcdef
+          type: string
+        status:
+          description: Implementation status
+          enum:
+          - success
+          - failed
+          example: success
+          type: string
+      required:
+      - apiKey
+      - status
+      - suggestionId
+      type: object
+    reportImplementationStatus_200_response:
+      example:
+        success: true
+        message: Implementation status updated
+      properties:
+        success:
+          example: true
+          type: boolean
+        message:
+          example: Implementation status updated
+          type: string
+      type: object
+    Project__count:
+      description: Count of related entities
+      example:
+        pages: 150
+        suggestions: 25
+      properties:
+        pages:
+          example: 150
+          type: integer
+        suggestions:
+          example: 25
+          type: integer
+      type: object
+  securitySchemes:
+    ApiKeyAuth:
+      description: |
+        API key authentication. Include your API key in the Authorization header:
+        ```
+        Authorization: Bearer YOUR_API_KEY
+        ```
+
+        Get your API key from your RankVectors dashboard: Settings → API Keys
+      in: header
+      name: Authorization
+      type: apiKey
+
