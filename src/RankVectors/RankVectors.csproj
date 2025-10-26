@@ -12,8 +12,8 @@
     <Description>Official RankVectors API SDK for C# - Intelligent internal linking optimization using AI</Description>
     <Copyright>RankVectors</Copyright>
     <RootNamespace>RankVectors</RootNamespace>
-    <Version>1.0.0</Version>
-    <PackageVersion>1.0.0</PackageVersion>
+    <Version>1.0.1</Version>
+    <PackageVersion>1.0.1</PackageVersion>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\RankVectors.xml</DocumentationFile>
     <RepositoryUrl>https://github.com/RankVectors/csharp-sdk</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -22,7 +22,12 @@
     <PackageTags>rankvectors;seo;internal-linking;api;sdk</PackageTags>
     <Nullable>enable</Nullable>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.5" />
