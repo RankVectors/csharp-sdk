@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
   contact:
-    email: support@rankvectors.com
+    email: tj@rankvectors.com
     name: RankVectors Support
-    url: https://docs.rankvectors.com
+    url: https://rankvectors.com/docs
   description: "Intelligent internal linking optimization API using AI. \n\nRankVectors\
     \ helps you automatically discover and implement optimal internal links \nacross\
     \ your website to improve SEO performance and user experience.\n\n## Key Features\n\

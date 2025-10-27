@@ -72,7 +72,7 @@ Console.WriteLine($"Created project: {project.Name}");
 
 ## Documentation
 
-- [API Documentation](https://docs.rankvectors.com)
+- [API Documentation](https://rankvectors.com/docs)
 - [GitHub Repository](https://github.com/RankVectors/csharp-sdk)
 - [RankVectors Website](https://rankvectors.com)
 
@@ -82,6 +82,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Support
 
-- Email: support@rankvectors.com
-- Documentation: https://docs.rankvectors.com
+- Email: tj@rankvectors.com
+- Documentation: https://rankvectors.com/docs
 - Issues: https://github.com/RankVectors/csharp-sdk/issues
